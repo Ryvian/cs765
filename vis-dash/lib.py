@@ -66,7 +66,7 @@ def make_scatterplot(data: pd.DataFrame):
             'overlap': True,
             'index': True
         },
-        custom_data=['index']
+        custom_data=['index', 'label']
         )
     return fig
 
@@ -76,4 +76,9 @@ def make_barplot_aux(data: pd.DataFrame):
     overlaps["Label"] = overlaps.index
     overlaps.rename(columns={"overlap": "Mean Overlap"}, inplace=True)
     fig = px.bar(overlaps, x='Label', y='Mean Overlap', )
+    return fig
+
+def make_boxplot_aux(data: pd.DataFrame):
+    df = data[["label", "overlap"]]
+    fig = px.box(df, x='label', y='overlap', )
     return fig

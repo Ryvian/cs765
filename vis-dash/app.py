@@ -43,6 +43,10 @@ def make_barplot(method: str):
     df = dr_data[method]
     return make_barplot_aux(df)
 
+def make_boxplot(method: str):
+    df = dr_data[method]
+    return make_boxplot_aux(df)
+
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # controls = dbc.Card(
@@ -93,7 +97,7 @@ method = dbc.Card(
         html.Div( [
                 dbc.Label("highlight:"),
                 dcc.Dropdown(
-                    id="highlight-choice",
+                    id="pca-highlight-choice",
                     options=[
                         {"label": col, "value": col} for col in highlight_methods
                     ],
@@ -126,8 +130,11 @@ rows = [
             figure=make_scatterplot_pca(),
         ), md=5),
         dbc.Col(dcc.Graph(
-            id="method-pca-bar",
-            figure=make_barplot('pca'),
+            # id="method-pca-bar",
+            # figure=make_barplot('pca'),
+            id="method-pca-box",
+            figure=make_boxplot('pca'),
+
         ), md=5),
     ], align="center")
 ]
@@ -163,16 +170,22 @@ app.layout = dbc.Container(
 
 @app.callback(
     Output('method-pca-scatterplot', 'figure'),
-    Input('method-pca-scatterplot', 'clickData')
+    Input('method-pca-scatterplot', 'clickData'),
+    Input('pca-highlight-choice', 'value')
 )
-def update_selection_pca(clicked):
+def update_selection_pca(clicked, highlight):
     if clicked:
-        clicked = clicked["points"]
-        clicked = clicked[0]['customdata'][0]
-        selection = [i for i in raw_neighbors[clicked]]
-        selection.append(clicked)
+        clicked = clicked["points"][0]['customdata']
+        clicked_index = clicked[0]
+        clicked_label = clicked[1]
+        if highlight == "neighbors":
+            selection = [i for i in raw_neighbors[clicked_index]]
+            selection.append(clicked)
+        else: # same label
+            selection = list(raw_data[raw_data['label'] == clicked_label].index)
     else:
-        selection = []        
+        selection = []    
+  
     fig = fig_data["pca"]
     fig.update_traces(selectedpoints=selection)
     return fig
