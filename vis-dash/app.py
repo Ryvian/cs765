@@ -28,6 +28,7 @@ dr_data = {}
 fig_data = {}
 
 dr_methods = ["PCA", "T-SNE"]
+highlight_methods = ["neighbors", "same label"]
 
 # functions
 def make_scatterplot_pca():
@@ -78,13 +79,18 @@ method = dbc.Card(
     [
         html.Div(
             [
-                dbc.Label("Method"),
+                dbc.Label("Method:"),
+                html.Div("PCA"),
+            ], 
+        ),
+        html.Div( [
+                dbc.Label("highlight:"),
                 dcc.Dropdown(
-                    id="method-choice",
+                    id="highlight-choice",
                     options=[
-                        {"label": col, "value": col} for col in dr_methods
+                        {"label": col, "value": col} for col in highlight_methods
                     ],
-                    value=dr_methods[0],
+                    value=highlight_methods[0],
                 ),
             ]
         ),
