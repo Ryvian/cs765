@@ -104,8 +104,12 @@ celerybeat.pid
 # Environments
 .env
 .venv
+static/
+vis/
+*.ipynb
 env/
 venv/
+venv-dash/
 ENV/
 env.bak/
 venv.bak/
