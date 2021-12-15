@@ -6,6 +6,9 @@ import plotly.graph_objs as go
 import plotly.express as px
 from dash import Input, Output, dcc, html
 from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+from sklearn.manifold import trustworthiness
+import umap
 from scipy.spatial import KDTree
 
 def find_neighbors(data: np.ndarray, tree: KDTree, n):
@@ -38,10 +41,23 @@ def process_data(dr: np.ndarray, method: str, processed_data: pd.DataFrame, raw_
     df["index"] = df.index
     return df
 
+def calculate_correspondence(orignal: np.ndarray, embedded: np.ndarray, n_neighbors: int):
+    return trustworthiness(orignal, embedded, n_neighbors=n_neighbors)
+
 def process_data_pca(raw_features: pd.DataFrame, processed_data: pd.DataFrame, raw_data: pd.DataFrame, raw_neighbors, n):
     pca = PCA(n_components=2)
     dr = pca.fit_transform(raw_features.to_numpy())
     return process_data(dr, "pca", processed_data, raw_data, raw_neighbors, n)
+
+def process_data_tsne(raw_features: pd.DataFrame, processed_data: pd.DataFrame, raw_data: pd.DataFrame, raw_neighbors, n):
+    tsne = TSNE(n_components=2)
+    dr = tsne.fit_transform(raw_features.to_numpy())
+    return process_data(dr, "tsne", processed_data, raw_data, raw_neighbors, n)
+
+def process_data_umap(raw_features: pd.DataFrame, processed_data: pd.DataFrame, raw_data: pd.DataFrame, raw_neighbors, n):
+    umap1 = umap.UMAP()
+    dr = umap1.fit_transform(raw_features.to_numpy())
+    return process_data(dr, "umap", processed_data, raw_data, raw_neighbors, n)
 
 def make_scatterplot(data: pd.DataFrame):
     fig = px.scatter(data, x="x", y="y", color="overlap", hover_name="label", color_continuous_scale='Bluered_r', hover_data={
@@ -54,3 +70,10 @@ def make_scatterplot(data: pd.DataFrame):
         )
     return fig
 
+def make_barplot_aux(data: pd.DataFrame):
+    df = data[["label", "overlap"]]
+    overlaps = df.groupby("label").mean()
+    overlaps["Label"] = overlaps.index
+    overlaps.rename(columns={"overlap": "Mean Overlap"}, inplace=True)
+    fig = px.bar(overlaps, x='Label', y='Mean Overlap', )
+    return fig

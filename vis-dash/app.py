@@ -30,12 +30,18 @@ fig_data = {}
 dr_methods = ["PCA", "T-SNE"]
 highlight_methods = ["neighbors", "same label"]
 
+process_data_pca(raw_features, dr_data, raw_data, raw_neighbors, N_NEIGHBORS)
+
 # functions
 def make_scatterplot_pca():
-    df = process_data_pca(raw_features, dr_data, raw_data, raw_neighbors, N_NEIGHBORS)
+    df = dr_data['pca']
     fig = make_scatterplot(df)
     fig_data["pca"] = fig
     return fig
+
+def make_barplot(method: str):
+    df = dr_data[method]
+    return make_barplot_aux(df)
 
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -75,6 +81,7 @@ app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 #     body=True,
 # )
 
+corr = calculate_correspondence(raw_features.values, dr_data['pca'][["x", "y"]].values, N_NEIGHBORS)
 method = dbc.Card(
     [
         html.Div(
@@ -96,13 +103,14 @@ method = dbc.Card(
         ),
         html.Div(
             [
-                dbc.Label("Correspondence"),
-                html.Div("0.0", id="method-correspondence")
+                dbc.Label("Trustworthiness"),
+                html.Div(f"{corr:.3f}", id="pca-correspondence")
             ]
         ),
     ],
     body=True,
 )
+
 
 rows = [
     dbc.Row(html.H1("&nbsp;")),
@@ -114,10 +122,13 @@ rows = [
     dbc.Row([
         dbc.Col(method, md=2),
         dbc.Col(dcc.Graph(
-            id = "method-pca-graph",
+            id = "method-pca-scatterplot",
             figure=make_scatterplot_pca(),
         ), md=5),
-        dbc.Col([], md=5)
+        dbc.Col(dcc.Graph(
+            id="method-pca-bar",
+            figure=make_barplot('pca'),
+        ), md=5),
     ], align="center")
 ]
 
@@ -150,10 +161,9 @@ app.layout = dbc.Container(
     fluid=True,
 )
 
-
 @app.callback(
-    Output('method-pca-graph', 'figure'),
-    Input('method-pca-graph', 'clickData')
+    Output('method-pca-scatterplot', 'figure'),
+    Input('method-pca-scatterplot', 'clickData')
 )
 def update_selection_pca(clicked):
     if clicked:
