@@ -41,6 +41,33 @@ def process_data(dr: np.ndarray, method: str, processed_data: pd.DataFrame, raw_
     df["index"] = df.index
     return df
 
+def process_data_tsne1(dr: np.ndarray, method: str, processed_data: pd.DataFrame, raw_data: pd.DataFrame, raw_neighbors, n):
+    data = processed_data
+    data[method] = pd.DataFrame()
+    df = data["tsne"]
+    df["label"] = raw_data["label"]
+    df["x"] = dr[:, 0]
+    df["y"] = dr[:, 1]
+    dr_tree = KDTree(dr)
+    dr_neighbors = find_neighbors(dr, dr_tree, n)
+    overlaps = find_overlaps(raw_neighbors, dr_neighbors)
+    df["overlap"] = [overlaps[i] for i in df.index]
+    df["index"] = df.index
+    return df
+
+def process_data_umap1(dr: np.ndarray, method: str, processed_data: pd.DataFrame, raw_data: pd.DataFrame, raw_neighbors, n):
+    data = processed_data
+    data[method] = pd.DataFrame()
+    df = data["umap"]
+    df["label"] = raw_data["label"]
+    df["x"] = dr[:, 0]
+    df["y"] = dr[:, 1]
+    dr_tree = KDTree(dr)
+    dr_neighbors = find_neighbors(dr, dr_tree, n)
+    overlaps = find_overlaps(raw_neighbors, dr_neighbors)
+    df["overlap"] = [overlaps[i] for i in df.index]
+    df["index"] = df.index
+    return df
 def calculate_correspondence(orignal: np.ndarray, embedded: np.ndarray, n_neighbors: int):
     return trustworthiness(orignal, embedded, n_neighbors=n_neighbors)
 
@@ -52,12 +79,12 @@ def process_data_pca(raw_features: pd.DataFrame, processed_data: pd.DataFrame, r
 def process_data_tsne(raw_features: pd.DataFrame, processed_data: pd.DataFrame, raw_data: pd.DataFrame, raw_neighbors, n):
     tsne = TSNE(n_components=2)
     dr = tsne.fit_transform(raw_features.to_numpy())
-    return process_data(dr, "tsne", processed_data, raw_data, raw_neighbors, n)
+    return process_data_tsne1(dr, "tsne", processed_data, raw_data, raw_neighbors, n)
 
 def process_data_umap(raw_features: pd.DataFrame, processed_data: pd.DataFrame, raw_data: pd.DataFrame, raw_neighbors, n):
     umap1 = umap.UMAP()
     dr = umap1.fit_transform(raw_features.to_numpy())
-    return process_data(dr, "umap", processed_data, raw_data, raw_neighbors, n)
+    return process_data_umap1(dr, "umap", processed_data, raw_data, raw_neighbors, n)
 
 def make_scatterplot(data: pd.DataFrame):
     fig = px.scatter(data, x="x", y="y", color="overlap", hover_name="label", color_continuous_scale='Bluered_r', hover_data={
