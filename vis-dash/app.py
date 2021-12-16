@@ -6,12 +6,11 @@ import plotly.graph_objs as go
 import plotly.express as px
 from dash import Input, Output, dcc, html
 from scipy.spatial import KDTree
-from copy import copy
 from lib import *
 
 N_NEIGHBORS = 15
 
-raw_data = pd.read_csv("~/Downloads/mnist_test.csv")
+raw_data = pd.read_csv("./static/mnist_test.csv")
 raw_data = raw_data[:1000]
 t = list(raw_data.columns)
 t.remove("label")
@@ -155,10 +154,11 @@ method2 = dbc.Card(
 rows = [
     dbc.Row(html.H1("&nbsp;")),
     dbc.Row([
-        dbc.Col(html.H2("Method"), md=2),
-        dbc.Col(html.H2("Scatter Plot"), md=5),
-        dbc.Col(html.H2("Overlap"), md=5)
+        dbc.Col(html.H2("Method", className="text-center"), md=2),
+        dbc.Col(html.H2("Scatter Plot", className="text-center"), md=5),
+        dbc.Col(html.H2("Overlap", className="text-center"), md=5)
     ], align="center"),
+    html.Hr(),
     dbc.Row([
         dbc.Col(method, md=2),
         dbc.Col(dcc.Graph(
@@ -173,7 +173,8 @@ rows = [
 
         ), md=5),
     ], align="center"),
-dbc.Row([
+    html.Hr(),
+    dbc.Row([
         dbc.Col(method1, md=2),
         dbc.Col(dcc.Graph(
             id = "method-"+order_dict_lower[order[1]]+"-scatterplot",
@@ -187,7 +188,9 @@ dbc.Row([
 
         ), md=5),
     ], align="center"),
-dbc.Row([
+    html.Hr(),
+
+    dbc.Row([
         dbc.Col(method2, md=2),
         dbc.Col(dcc.Graph(
             id = "method-"+order_dict_lower[order[2]]+"-scatterplot",
@@ -215,13 +218,18 @@ navbar = dbc.NavbarSimple(
     dbc.Button("Upload", class_name="btn btn-primary")
 ])
 
-app.layout = dbc.Container(
+page_layout = dbc.Container(
     [
         navbar,
         *rows
     ],
     fluid=True,
 )
+
+app.layout = html.Div([
+    dcc.Location(id='url', refresh=False),
+    html.Div(id='page-content')
+])
 
 @app.callback(
     Output('method-pca-scatterplot', 'figure'),
@@ -291,6 +299,13 @@ def update_selection_tsne(clicked, highlight):
     fig.update_traces(selectedpoints=selection)
     return fig
 
+@app.callback(dash.dependencies.Output('page-content', 'children'),
+              [dash.dependencies.Input('url', 'pathname')])
+def display_page(pathname):
+    if pathname == '/cs765':
+        return page_layout
+    else:
+        return '404'
 
 
 if __name__ == "__main__":
