@@ -5,17 +5,12 @@ import numpy as np
 import plotly.graph_objs as go
 import plotly.express as px
 from dash import Input, Output, dcc, html
-# from sklearn import datasets
-# from sklearn.cluster import KMeans
-# from sklearn.decomposition import PCA
 from scipy.spatial import KDTree
 from copy import copy
 from lib import *
 
 N_NEIGHBORS = 15
 
-# iris_raw = datasets.load_iris()
-# iris = pd.DataFrame(iris_raw["data"], columns=iris_raw["feature_names"])
 raw_data = pd.read_csv("~/Downloads/mnist_test.csv")
 raw_data = raw_data[:1000]
 t = list(raw_data.columns)
@@ -222,16 +217,7 @@ navbar = dbc.NavbarSimple(
 
 app.layout = dbc.Container(
     [
-        # html.H1("Iris k-means clustering"),
-        # html.Hr(),
         navbar,
-        # dbc.Row(
-        #     [
-        #         dbc.Col(controls, md=4),
-        #         dbc.Col(dcc.Graph(id="cluster-graph"), md=8),
-        #     ],
-        #     align="center",
-        # ),
         *rows
     ],
     fluid=True,
