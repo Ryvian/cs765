@@ -101,7 +101,7 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
-./vis-dash/app-ref.py
+vis-dash/app-ref.py
 
 # Environments
 .env
